@@ -57,7 +57,7 @@
   <div class="container">
     <button id="inicio" onclick="mostrar('inicioSeccion')">Inicio</button>
     <button id="reportes" onclick="mostrar('reportesSeccion')">Reportes</button>
-    <button id="horarios" onclick="mostrar('horariosSeccion')">Horarios</button>
+    <button id="horarios" onclick="abrirExcel()">Horarios</button>
     <button id="pagos" onclick="mostrar('pagosSeccion')">Pagos</button>
   </div>
 
@@ -71,11 +71,6 @@
     <p>Aquí puedes ver los reportes del sistema.</p>
   </div>
 
-  <div id="horariosSeccion" class="seccion">
-    <h2>Horarios</h2>
-    <p>Consulta y gestiona los horarios.</p>
-  </div>
-
   <div id="pagosSeccion" class="seccion">
     <h2>Pagos</h2>
     <p>Administra los pagos.</p>
@@ -87,6 +82,14 @@
       secciones.forEach(sec => sec.style.display = 'none');
 
       document.getElementById(seccionId).style.display = 'block';
+    }
+
+    function abrirExcel() {
+      // Crea y descarga un archivo Excel vacío
+      const link = document.createElement('a');
+      link.href = 'data:application/vnd.ms-excel,';
+      link.download = 'horarios.xls';
+      link.click();
     }
 
     // Mostrar inicio por defecto
