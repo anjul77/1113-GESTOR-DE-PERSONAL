@@ -22,8 +22,6 @@
     }
 
     .btn { background: #007BFF; }
-    .btn-verde { background: #28a745; }
-    .btn-rojo { background: #dc3545; }
 
     .pantalla {
       display: none;
@@ -65,43 +63,12 @@
   <div id="menu" class="pantalla">
     <h2>Menú Principal</h2>
 
-    <button class="btn" onclick="abrir('asistencia')">Asistencia</button>
     <button class="btn" onclick="abrir('empleados')">Empleados</button>
     <button class="btn">Reportes</button>
     <button class="btn">Horarios</button>
     <button class="btn">Pagos</button>
     <button class="btn">Configuración</button>
     <button class="btn">Salir</button>
-  </div>
-
-  <!-- 🟩 MÓDULO ASISTENCIA -->
-  <div id="asistencia" class="pantalla">
-    <button onclick="volver()">⬅ Volver</button>
-
-    <div class="panel">
-      <h3>Control de Asistencia</h3>
-
-      <input type="text" id="codigo" placeholder="Código">
-
-      <br>
-
-      <button class="btn-verde" onclick="registrar('Entrada')">Entrada</button>
-      <button class="btn-rojo" onclick="registrar('Salida')">Salida</button>
-
-      <p id="mensaje"></p>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Empleado</th>
-          <th>Tipo</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-        </tr>
-      </thead>
-      <tbody id="tabla"></tbody>
-    </table>
   </div>
 
   <!-- 🟨 MÓDULO EMPLEADOS -->
@@ -140,54 +107,6 @@
 
     function volver() {
       abrir('menu');
-    }
-
-    // 🔵 ASISTENCIA (historial)
-    function registrar(tipo) {
-      const codigo = document.getElementById('codigo').value.trim();
-
-      if (!codigo) {
-        alert('Ingrese código');
-        return;
-      }
-
-      const ahora = new Date();
-
-      const registro = {
-        codigo,
-        tipo,
-        fecha: ahora.toLocaleDateString(),
-        hora: ahora.toLocaleTimeString()
-      };
-
-      let datos = JSON.parse(localStorage.getItem('registros')) || [];
-      datos.push(registro);
-      localStorage.setItem('registros', JSON.stringify(datos));
-
-      document.getElementById('mensaje').innerText =
-        `Empleado ${codigo} registró ${tipo}`;
-
-      document.getElementById('codigo').value = '';
-
-      mostrarTabla();
-    }
-
-    function mostrarTabla() {
-      let datos = JSON.parse(localStorage.getItem('registros')) || [];
-      const tbody = document.getElementById('tabla');
-
-      tbody.innerHTML = '';
-
-      datos.forEach(r => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${r.codigo}</td>
-            <td>${r.tipo}</td>
-            <td>${r.fecha}</td>
-            <td>${r.hora}</td>
-          </tr>
-        `;
-      });
     }
 
     // 🟡 EMPLEADOS (entrada/salida automática)
@@ -251,7 +170,6 @@
     }
 
     // cargar datos al iniciar
-    mostrarTabla();
     mostrarEmpleados();
   </script>
 
