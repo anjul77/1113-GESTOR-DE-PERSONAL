@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Empleados</title>
+  <title>Sistema</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,9 +12,46 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: #eef2f3;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(2, 160px);
+      gap: 20px;
+    }
+    button {
+      padding: 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      transition: 0.3s;
+    }
+    #inicio { background-color: #2196F3; }
+    #reportes { background-color: #4CAF50; }
+    #horarios { background-color: #FF9800; }
+    #pagos { background-color: #9C27B0; }
+
+    button:hover {
+      opacity: 0.8;
     }
 
+    .seccion {
+      display: none;
+      margin-top: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+body {
     button {
       padding: 20px 40px;
       font-size: 18px;
@@ -67,4 +104,79 @@
       <button onclick="registrar('Ausencia')">Ausencia</button>
     </div>
 
-    <p
+    <p id="mensaje"></p>
+  </div>
+
+  <script>
+    function mostrarPanel() {
+      document.getElementById('panelEmpleado').style.display = 'block';
+    }
+
+    function registrar(tipo) {
+      const codigo = document.getElementById('codigo').value;
+
+      if (codigo === '') {
+        alert('Por favor ingrese su código');
+        return;
+      }
+
+      const mensaje = 'Empleado ' + codigo + ' registró: ' + tipo;
+      document.getElementById('mensaje').innerText = mensaje;
+
+      // Enviar correo usando mailto
+      const asunto = encodeURIComponent('Registro de empleado');
+      const cuerpo = encodeURIComponent(mensaje);
+
+      window.location.href = `mailto:lorerario122@gmail.com?subject=${asunto}&body=${cuerpo}`;
+    }
+  </script>
+
+</body>
+</html>
+
+  <h1>Sistema Principal</h1>
+
+  <div class="container">
+    <button id="inicio" onclick="mostrar('inicioSeccion')">Inicio</button>
+    <button id="reportes" onclick="mostrar('reportesSeccion')">Reportes</button>
+    <button id="horarios" onclick="abrirExcel()">Horarios</button>
+    <button id="pagos" onclick="mostrar('pagosSeccion')">Pagos</button>
+  </div>
+
+  <div id="inicioSeccion" class="seccion">
+    <h2>Inicio</h2>
+    <p>Bienvenido. Desde aquí puedes acceder a reportes, horarios y pagos.</p>
+  </div>
+
+  <div id="reportesSeccion" class="seccion">
+    <h2>Reportes</h2>
+    <p>Aquí puedes ver los reportes del sistema.</p>
+  </div>
+
+  <div id="pagosSeccion" class="seccion">
+    <h2>Pagos</h2>
+    <p>Administra los pagos.</p>
+  </div>
+
+  <script>
+    function mostrar(seccionId) {
+      const secciones = document.querySelectorAll('.seccion');
+      secciones.forEach(sec => sec.style.display = 'none');
+
+      document.getElementById(seccionId).style.display = 'block';
+    }
+
+    function abrirExcel() {
+      // Crea y descarga un archivo Excel vacío
+      const link = document.createElement('a');
+      link.href = 'data:application/vnd.ms-excel,';
+      link.download = 'horarios.xls';
+      link.click();
+    }
+
+    // Mostrar inicio por defecto
+    mostrar('inicioSeccion');
+  </script>
+
+</body>
+</html>
