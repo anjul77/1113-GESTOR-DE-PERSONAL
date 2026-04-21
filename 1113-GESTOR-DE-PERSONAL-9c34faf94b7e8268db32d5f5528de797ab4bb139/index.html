@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Sistema de Empleados</title>
+  <title>Lorteck</title>
 
   <style>
     body {
@@ -12,7 +12,7 @@
     }
 
     button {
-      padding: 15px 25px;
+      padding: 12px 20px;
       margin: 10px;
       border: none;
       border-radius: 8px;
@@ -23,11 +23,17 @@
 
     .btn { background: #007BFF; }
 
+    input {
+      padding: 10px;
+      margin: 10px;
+      width: 200px;
+    }
+
     .pantalla {
       display: none;
     }
 
-    #menu {
+    #login {
       display: block;
     }
 
@@ -36,6 +42,7 @@
       background: white;
       padding: 20px;
       border-radius: 10px;
+      display: inline-block;
     }
 
     table {
@@ -59,28 +66,53 @@
 </head>
 <body>
 
-  <!-- 🟦 MENÚ PRINCIPAL -->
+  <!-- 🔐 LOGIN -->
+  <div id="login" class="pantalla">
+    <div class="panel">
+      <h2>🔷 Lorteck</h2>
+      <h3>Iniciar Sesión</h3>
+
+      <input type="email" id="correo" placeholder="Correo empresa"><br>
+      <input type="password" id="password" placeholder="Contraseña"><br>
+
+      <button class="btn" onclick="login()">Iniciar sesión</button>
+      <button class="btn" onclick="abrir('registro')">Registrarse</button>
+
+      <p id="mensajeLogin"></p>
+    </div>
+  </div>
+
+  <!-- 📝 REGISTRO -->
+  <div id="registro" class="pantalla">
+    <div class="panel">
+      <h3>Crear cuenta</h3>
+
+      <input type="email" id="nuevoCorreo" placeholder="Correo empresa"><br>
+      <input type="password" id="nuevoPassword" placeholder="Contraseña"><br>
+
+      <button class="btn" onclick="registrarUsuario()">Crear cuenta</button>
+      <button class="btn" onclick="abrir('login')">Volver</button>
+
+      <p id="mensajeRegistro"></p>
+    </div>
+  </div>
+
+  <!-- 🟦 MENÚ -->
   <div id="menu" class="pantalla">
     <h2>🔷 Lorteck - Sistema de Empleados</h2>
 
     <button class="btn" onclick="abrir('empleados')">Empleados</button>
-    <button class="btn">Reportes</button>
-    <button class="btn">Horarios</button>
-    <button class="btn">Pagos</button>
-    <button class="btn">Configuración</button>
-    <button class="btn">Salir</button>
+    <button class="btn" onclick="logout()">Cerrar sesión</button>
   </div>
 
-  <!-- 🟨 MÓDULO EMPLEADOS -->
+  <!-- 👨‍💼 EMPLEADOS -->
   <div id="empleados" class="pantalla">
     <button class="btn" onclick="volver()">⬅ Volver</button>
 
     <div class="panel">
       <h3>Registro de Empleados</h3>
 
-      <input type="text" id="codigoEmpleado" placeholder="Código empleado">
-
-      <br>
+      <input type="text" id="codigoEmpleado" placeholder="Código empleado"><br>
 
       <button class="btn" onclick="registrarEmpleado()">Registrar</button>
 
@@ -110,7 +142,45 @@
       abrir('menu');
     }
 
-    // 🔥 VERIFICAR CAMBIO DE DÍA
+    // 🔐 LOGIN
+    function login() {
+      const correo = document.getElementById('correo').value;
+      const password = document.getElementById('password').value;
+
+      const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+      if (!usuario || usuario.correo !== correo || usuario.password !== password) {
+        document.getElementById('mensajeLogin').innerText = 'Datos incorrectos';
+        return;
+      }
+
+      abrir('menu');
+    }
+
+    // 📝 REGISTRO
+    function registrarUsuario() {
+      const correo = document.getElementById('nuevoCorreo').value;
+      const password = document.getElementById('nuevoPassword').value;
+
+      if (!correo || !password) {
+        alert('Complete los datos');
+        return;
+      }
+
+      const usuario = { correo, password };
+
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+
+      document.getElementById('mensajeRegistro').innerText = 'Cuenta creada';
+
+      abrir('login');
+    }
+
+    function logout() {
+      abrir('login');
+    }
+
+    // 🔄 RESET DIARIO
     function verificarDia() {
       const hoy = new Date().toLocaleDateString();
       const ultimaFecha = localStorage.getItem('fechaRegistro');
@@ -121,6 +191,7 @@
       }
     }
 
+    // 👨‍💼 EMPLEADOS
     function registrarEmpleado() {
       verificarDia();
 
@@ -132,7 +203,6 @@
       }
 
       let datos = JSON.parse(localStorage.getItem('empleados')) || [];
-
       let empleado = datos.find(e => e.codigo === codigo);
 
       const fechaObj = new Date();
@@ -140,30 +210,16 @@
       const hora = fechaObj.toLocaleTimeString();
 
       if (!empleado) {
-        empleado = {
-          codigo: codigo,
-          fecha: fecha,
-          entrada: hora,
-          salida: ''
-        };
+        empleado = { codigo, fecha, entrada: hora, salida: '' };
         datos.push(empleado);
-
-        document.getElementById('mensajeEmpleado').innerText =
-          `Empleado ${codigo} registró ENTRADA`;
-
       } else if (!empleado.salida) {
         empleado.salida = hora;
-
-        document.getElementById('mensajeEmpleado').innerText =
-          `Empleado ${codigo} registró SALIDA`;
-
       } else {
-        alert('Este empleado ya registró entrada y salida hoy');
+        alert('Ya registró hoy');
         return;
       }
 
       localStorage.setItem('empleados', JSON.stringify(datos));
-
       document.getElementById('codigoEmpleado').value = '';
 
       mostrarEmpleados();
@@ -181,16 +237,14 @@
         tbody.innerHTML += `
           <tr>
             <td>${e.codigo}</td>
-            <td>${e.fecha || '-'}</td>
-            <td>${e.entrada || '-'}</td>
+            <td>${e.fecha}</td>
+            <td>${e.entrada}</td>
             <td>${e.salida || '-'}</td>
           </tr>
         `;
       });
     }
 
-    // cargar datos al iniciar
-    verificarDia();
     mostrarEmpleados();
   </script>
 
