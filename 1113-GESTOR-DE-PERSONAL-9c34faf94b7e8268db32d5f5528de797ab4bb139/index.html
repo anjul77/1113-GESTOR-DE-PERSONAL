@@ -91,6 +91,7 @@
       <thead>
         <tr>
           <th>Empleado</th>
+          <th>Fecha</th>
           <th>Entrada</th>
           <th>Salida</th>
         </tr>
@@ -109,7 +110,6 @@
       abrir('menu');
     }
 
-    // 🟡 EMPLEADOS (entrada/salida automática)
     function registrarEmpleado() {
       const codigo = document.getElementById('codigoEmpleado').value.trim();
 
@@ -121,12 +121,16 @@
       let datos = JSON.parse(localStorage.getItem('empleados')) || [];
 
       let empleado = datos.find(e => e.codigo === codigo);
-      const ahora = new Date().toLocaleTimeString();
+
+      const fechaObj = new Date();
+      const fecha = fechaObj.toLocaleDateString();
+      const hora = fechaObj.toLocaleTimeString();
 
       if (!empleado) {
         empleado = {
           codigo: codigo,
-          entrada: ahora,
+          fecha: fecha,
+          entrada: hora,
           salida: ''
         };
         datos.push(empleado);
@@ -135,7 +139,7 @@
           `Empleado ${codigo} registró ENTRADA`;
 
       } else if (!empleado.salida) {
-        empleado.salida = ahora;
+        empleado.salida = hora;
 
         document.getElementById('mensajeEmpleado').innerText =
           `Empleado ${codigo} registró SALIDA`;
@@ -162,6 +166,7 @@
         tbody.innerHTML += `
           <tr>
             <td>${e.codigo}</td>
+            <td>${e.fecha || '-'}</td>
             <td>${e.entrada || '-'}</td>
             <td>${e.salida || '-'}</td>
           </tr>
