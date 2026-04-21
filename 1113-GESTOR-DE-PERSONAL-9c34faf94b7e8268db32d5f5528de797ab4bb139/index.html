@@ -17,7 +17,7 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      color: black;
+      color: white;
       font-size: 16px;
     }
 
@@ -73,7 +73,7 @@
 
   <!-- 🟨 MÓDULO EMPLEADOS -->
   <div id="empleados" class="pantalla">
-    <button onclick="volver()">⬅ Volver</button>
+    <button class="btn" onclick="volver()">⬅ Volver</button>
 
     <div class="panel">
       <h3>Registro de Empleados</h3>
@@ -116,7 +116,7 @@
       const ultimaFecha = localStorage.getItem('fechaRegistro');
 
       if (ultimaFecha !== hoy) {
-        localStorage.removeItem('empleados'); // borrar registros
+        localStorage.removeItem('empleados');
         localStorage.setItem('fechaRegistro', hoy);
       }
     }
