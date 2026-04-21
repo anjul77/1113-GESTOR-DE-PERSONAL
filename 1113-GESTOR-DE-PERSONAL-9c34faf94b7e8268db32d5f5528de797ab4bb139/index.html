@@ -164,6 +164,32 @@
     // cargar tabla al iniciar
     mostrarTabla();
   </script>
+<div id="empleados" class="pantalla">
+  <button onclick="volver()">⬅ Volver</button>
+
+  <div class="panel">
+    <h3>Registro de Empleados</h3>
+
+    <input type="text" id="codigoEmpleado" placeholder="Código empleado">
+
+    <br>
+
+    <button onclick="registrarEmpleado()">Registrar</button>
+
+    <p id="mensajeEmpleado"></p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Empleado</th>
+        <th>Entrada</th>
+        <th>Salida</th>
+      </tr>
+    </thead>
+    <tbody id="tablaEmpleados"></tbody>
+  </table>
+</div>
 
 </body>
 </html>
