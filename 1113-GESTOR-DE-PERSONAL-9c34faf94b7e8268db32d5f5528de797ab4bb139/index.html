@@ -1,297 +1,242 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Lorteck</title>
+<meta charset="UTF-8">
+<title>Lorteck Empresarial</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      background: #eef2f3;
-    }
+<style>
+body { font-family: Arial; text-align: center; background:#eef2f3; }
+button { padding:10px; margin:5px; border:none; border-radius:6px; background:#007BFF; color:white; cursor:pointer; }
+input { padding:8px; margin:5px; }
+.pantalla { display:none; }
+#login { display:block; }
 
-    button {
-      padding: 12px 20px;
-      margin: 10px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      font-size: 16px;
-    }
-
-    .btn { background: #007BFF; }
-
-    input {
-      padding: 10px;
-      margin: 10px;
-      width: 200px;
-    }
-
-    .pantalla {
-      display: none;
-    }
-
-    #login {
-      display: block;
-    }
-
-    .panel {
-      margin-top: 20px;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-    }
-
-    table {
-      margin-top: 20px;
-      border-collapse: collapse;
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-
-    th {
-      background: #007BFF;
-      color: white;
-    }
-  </style>
+table {
+  width:80%;
+  margin:auto;
+  border-collapse: collapse;
+}
+th, td {
+  border:1px solid #ccc;
+  padding:8px;
+}
+th { background:#007BFF; color:white; }
+</style>
 </head>
+
 <body>
 
-  <!-- 🔐 LOGIN -->
-  <div id="login" class="pantalla">
-    <div class="panel">
-      <h2>🔷 Lorteck</h2>
-      <h3>Iniciar Sesión</h3>
+<!-- LOGIN -->
+<div id="login" class="pantalla">
+  <h2>Lorteck</h2>
+  <input id="correo" placeholder="Correo"><br>
+  <input id="password" type="password" placeholder="Contraseña"><br>
+  <button onclick="login()">Iniciar sesión</button>
+  <button onclick="abrir('registro')">Registrarse</button>
+</div>
 
-      <input type="email" id="correo" placeholder="Correo empresa"><br>
-      <input type="password" id="password" placeholder="Contraseña"><br>
+<!-- REGISTRO -->
+<div id="registro" class="pantalla">
+  <h3>Registro</h3>
+  <input id="usuario" placeholder="Usuario"><br>
+  <input id="nuevoCorreo" placeholder="Correo"><br>
+  <input id="nuevoPassword" type="password" placeholder="Contraseña"><br>
+  <button onclick="registrarUsuario()">Crear cuenta</button>
+  <button onclick="abrir('login')">Volver</button>
+</div>
 
-      <button class="btn" onclick="login()">Iniciar sesión</button>
-      <button class="btn" onclick="abrir('registro')">Registrarse</button>
+<!-- MENU -->
+<div id="menu" class="pantalla">
+  <h2>Menú Lorteck</h2>
+  <button onclick="abrir('empleados')">Empleados</button>
+  <button onclick="logout()">Cerrar sesión</button>
+</div>
 
-      <p id="mensajeLogin"></p>
-    </div>
-  </div>
+<!-- EMPLEADOS -->
+<div id="empleados" class="pantalla">
+  <h3 id="usuarioActivo"></h3>
 
-  <!-- 📝 REGISTRO -->
-  <div id="registro" class="pantalla">
-    <div class="panel">
-      <h3>Crear cuenta</h3>
+  <input id="codigoEmpleado" placeholder="Código"><br>
+  <button onclick="registrarEmpleado()">Registrar Entrada</button>
+  <button onclick="registrarSalida()">Registrar Salida</button>
 
-      <input type="text" id="usuario" placeholder="Usuario"><br>
-      <input type="email" id="nuevoCorreo" placeholder="Correo empresa"><br>
-      <input type="password" id="nuevoPassword" placeholder="Contraseña"><br>
-      <input type="password" id="confirmarPassword" placeholder="Confirmar contraseña"><br>
-      <input type="text" id="telefono" placeholder="Número de contacto"><br>
+  <br><br>
 
-      <button class="btn" onclick="registrarUsuario()">Crear cuenta</button>
-      <button class="btn" onclick="abrir('login')">Volver</button>
+  <button onclick="mostrarEmpleados()">Actualizar tabla</button>
+  <button onclick="abrir('menu')">Volver</button>
 
-      <p id="mensajeRegistro"></p>
-    </div>
-  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Usuario</th>
+        <th>Fecha</th>
+        <th>Entrada</th>
+        <th>Salida</th>
+      </tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+  </table>
+</div>
 
-  <!-- 🟦 MENÚ -->
-  <div id="menu" class="pantalla">
-    <h2>🔷 Lorteck - Sistema de Empleados</h2>
+<!-- 🔥 FIREBASE -->
+<script type="module">
 
-    <button class="btn" onclick="abrir('empleados')">Empleados</button>
-    <button class="btn" onclick="logout()">Cerrar sesión</button>
-  </div>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-  <!-- 👨‍💼 EMPLEADOS -->
-  <div id="empleados" class="pantalla">
-    <button class="btn" onclick="volver()">⬅ Volver</button>
+import {
+  getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <h4 id="usuarioActivo"></h4>
+// ⚠️ REEMPLAZA ESTO
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_DOMINIO",
+  projectId: "TU_PROJECT_ID"
+};
 
-    <div class="panel">
-      <h3>Registro de Empleados</h3>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-      <input type="text" id="codigoEmpleado" placeholder="Código empleado"><br>
+let rol = "";
+let usuarioNombre = "";
 
-      <button class="btn" onclick="registrarEmpleado()">Registrar</button>
+// NAVEGACIÓN
+window.abrir = (pantalla) => {
+  document.querySelectorAll('.pantalla').forEach(p => p.style.display='none');
+  document.getElementById(pantalla).style.display='block';
 
-      <p id="mensajeEmpleado"></p>
-    </div>
+  if (pantalla === "menu") verificarPermisos();
+  if (pantalla === "empleados") mostrarUsuario();
+};
 
-    <table>
-      <thead>
-        <tr>
-          <th>Empleado</th>
-          <th>Fecha</th>
-          <th>Entrada</th>
-          <th>Salida</th>
-        </tr>
-      </thead>
-      <tbody id="tablaEmpleados"></tbody>
-    </table>
-  </div>
+// REGISTRO
+window.registrarUsuario = async () => {
+  const usuario = document.getElementById("usuario").value;
+  const correo = document.getElementById("nuevoCorreo").value;
+  const pass = document.getElementById("nuevoPassword").value;
 
-  <script>
-    function abrir(pantalla) {
-      const sesion = localStorage.getItem('sesionActiva');
+  const cred = await createUserWithEmailAndPassword(auth, correo, pass);
 
-      if (pantalla === 'empleados' && !sesion) {
-        alert('Debe iniciar sesión');
-        abrir('login');
-        return;
+  await addDoc(collection(db, "usuarios"), {
+    uid: cred.user.uid,
+    usuario,
+    correo,
+    rol: usuario.toLowerCase() === "jefe" ? "jefe" : "empleado"
+  });
+
+  alert("Usuario creado");
+};
+
+// LOGIN
+window.login = async () => {
+  const correo = document.getElementById("correo").value;
+  const pass = document.getElementById("password").value;
+
+  const cred = await signInWithEmailAndPassword(auth, correo, pass);
+
+  const q = query(collection(db, "usuarios"), where("uid","==",cred.user.uid));
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach(doc => {
+    rol = doc.data().rol;
+    usuarioNombre = doc.data().usuario;
+  });
+
+  abrir("menu");
+};
+
+// LOGOUT
+window.logout = async () => {
+  await signOut(auth);
+  abrir("login");
+};
+
+// PERMISOS
+function verificarPermisos(){
+  if(rol !== "jefe"){
+    document.querySelectorAll("button").forEach(btn=>{
+      if(!btn.innerText.includes("Cerrar sesión")){
+        btn.disabled = true;
+        btn.style.background = "gray";
       }
+    });
+  }
+}
 
-      document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
-      document.getElementById(pantalla).style.display = 'block';
+// MOSTRAR USUARIO
+function mostrarUsuario(){
+  document.getElementById("usuarioActivo").innerText =
+    "Usuario: " + usuarioNombre;
+}
 
-      if (pantalla === 'empleados') {
-        mostrarUsuario();
-      }
-    }
+// REGISTRAR ENTRADA
+window.registrarEmpleado = async () => {
+  if(rol !== "jefe"){ alert("Sin permisos"); return; }
 
-    function volver() {
-      abrir('menu');
-    }
+  const codigo = document.getElementById("codigoEmpleado").value;
+  const ahora = new Date();
 
-    // 🔐 LOGIN
-    function login() {
-      const correo = document.getElementById('correo').value;
-      const password = document.getElementById('password').value;
+  await addDoc(collection(db,"asistencias"),{
+    codigo,
+    usuario: usuarioNombre,
+    fecha: ahora.toLocaleDateString(),
+    entrada: ahora.toLocaleTimeString(),
+    salida: ""
+  });
 
-      const usuario = JSON.parse(localStorage.getItem('usuario'));
+  alert("Entrada registrada");
+};
 
-      if (!usuario || usuario.correo !== correo || usuario.password !== password) {
-        document.getElementById('mensajeLogin').innerText = 'Datos incorrectos';
-        return;
-      }
+// REGISTRAR SALIDA
+window.registrarSalida = async () => {
+  const codigo = document.getElementById("codigoEmpleado").value;
 
-      localStorage.setItem('sesionActiva', 'true');
+  const q = query(collection(db,"asistencias"),
+    where("codigo","==",codigo)
+  );
 
-      abrir('menu');
-    }
+  const snapshot = await getDocs(q);
 
-    function logout() {
-      localStorage.removeItem('sesionActiva');
-      abrir('login');
-    }
-
-    function mostrarUsuario() {
-      const usuario = JSON.parse(localStorage.getItem('usuario'));
-
-      if (usuario) {
-        document.getElementById('usuarioActivo').innerText =
-          'Usuario: ' + usuario.usuario;
-      }
-    }
-
-    // 📝 REGISTRO
-    function registrarUsuario() {
-      const usuario = document.getElementById('usuario').value.trim();
-      const correo = document.getElementById('nuevoCorreo').value.trim();
-      const password = document.getElementById('nuevoPassword').value;
-      const confirmar = document.getElementById('confirmarPassword').value;
-      const telefono = document.getElementById('telefono').value.trim();
-
-      if (!usuario || !correo || !password || !confirmar || !telefono) {
-        alert('Complete todos los campos');
-        return;
-      }
-
-      if (password !== confirmar) {
-        document.getElementById('mensajeRegistro').innerText =
-          'Las contraseñas no coinciden';
-        return;
-      }
-
-      if (telefono.length < 7) {
-        document.getElementById('mensajeRegistro').innerText =
-          'Número inválido';
-        return;
-      }
-
-      const nuevoUsuario = { usuario, correo, password, telefono };
-
-      localStorage.setItem('usuario', JSON.stringify(nuevoUsuario));
-
-      document.getElementById('mensajeRegistro').innerText =
-        'Cuenta creada';
-
-      abrir('login');
-    }
-
-    // 🔄 RESET DIARIO
-    function verificarDia() {
-      const hoy = new Date().toLocaleDateString();
-      const ultimaFecha = localStorage.getItem('fechaRegistro');
-
-      if (ultimaFecha !== hoy) {
-        localStorage.removeItem('empleados');
-        localStorage.setItem('fechaRegistro', hoy);
-      }
-    }
-
-    // 👨‍💼 EMPLEADOS
-    function registrarEmpleado() {
-      verificarDia();
-
-      const codigo = document.getElementById('codigoEmpleado').value.trim();
-
-      if (!codigo) {
-        alert('Ingrese código');
-        return;
-      }
-
-      let datos = JSON.parse(localStorage.getItem('empleados')) || [];
-      let empleado = datos.find(e => e.codigo === codigo);
-
-      const fechaObj = new Date();
-      const fecha = fechaObj.toLocaleDateString();
-      const hora = fechaObj.toLocaleTimeString();
-
-      if (!empleado) {
-        empleado = { codigo, fecha, entrada: hora, salida: '' };
-        datos.push(empleado);
-      } else if (!empleado.salida) {
-        empleado.salida = hora;
-      } else {
-        alert('Ya registró hoy');
-        return;
-      }
-
-      localStorage.setItem('empleados', JSON.stringify(datos));
-      document.getElementById('codigoEmpleado').value = '';
-
-      mostrarEmpleados();
-    }
-
-    function mostrarEmpleados() {
-      verificarDia();
-
-      let datos = JSON.parse(localStorage.getItem('empleados')) || [];
-      const tbody = document.getElementById('tablaEmpleados');
-
-      tbody.innerHTML = '';
-
-      datos.forEach(e => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${e.codigo}</td>
-            <td>${e.fecha}</td>
-            <td>${e.entrada}</td>
-            <td>${e.salida || '-'}</td>
-          </tr>
-        `;
+  snapshot.forEach(async d=>{
+    if(!d.data().salida){
+      await updateDoc(doc(db,"asistencias",d.id),{
+        salida: new Date().toLocaleTimeString()
       });
     }
+  });
 
-    mostrarEmpleados();
-  </script>
+  alert("Salida registrada");
+};
+
+// MOSTRAR TABLA
+window.mostrarEmpleados = async () => {
+  const tabla = document.getElementById("tabla");
+  tabla.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db,"asistencias"));
+
+  snapshot.forEach(doc=>{
+    const d = doc.data();
+
+    tabla.innerHTML += `
+      <tr>
+        <td>${d.codigo}</td>
+        <td>${d.usuario}</td>
+        <td>${d.fecha}</td>
+        <td>${d.entrada}</td>
+        <td>${d.salida || "-"}</td>
+      </tr>
+    `;
+  });
+};
+
+</script>
 
 </body>
 </html>
