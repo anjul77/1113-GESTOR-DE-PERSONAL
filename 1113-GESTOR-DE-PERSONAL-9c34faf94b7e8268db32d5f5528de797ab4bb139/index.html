@@ -82,13 +82,16 @@
     </div>
   </div>
 
-  <!-- 📝 REGISTRO -->
+  <!-- 📝 REGISTRO MEJORADO -->
   <div id="registro" class="pantalla">
     <div class="panel">
       <h3>Crear cuenta</h3>
 
+      <input type="text" id="usuario" placeholder="Usuario"><br>
       <input type="email" id="nuevoCorreo" placeholder="Correo empresa"><br>
       <input type="password" id="nuevoPassword" placeholder="Contraseña"><br>
+      <input type="password" id="confirmarPassword" placeholder="Confirmar contraseña"><br>
+      <input type="text" id="telefono" placeholder="Número de contacto"><br>
 
       <button class="btn" onclick="registrarUsuario()">Crear cuenta</button>
       <button class="btn" onclick="abrir('login')">Volver</button>
@@ -157,21 +160,42 @@
       abrir('menu');
     }
 
-    // 📝 REGISTRO
+    // 📝 REGISTRO MEJORADO
     function registrarUsuario() {
-      const correo = document.getElementById('nuevoCorreo').value;
+      const usuario = document.getElementById('usuario').value.trim();
+      const correo = document.getElementById('nuevoCorreo').value.trim();
       const password = document.getElementById('nuevoPassword').value;
+      const confirmar = document.getElementById('confirmarPassword').value;
+      const telefono = document.getElementById('telefono').value.trim();
 
-      if (!correo || !password) {
-        alert('Complete los datos');
+      if (!usuario || !correo || !password || !confirmar || !telefono) {
+        alert('Complete todos los campos');
         return;
       }
 
-      const usuario = { correo, password };
+      if (password !== confirmar) {
+        document.getElementById('mensajeRegistro').innerText =
+          'Las contraseñas no coinciden';
+        return;
+      }
 
-      localStorage.setItem('usuario', JSON.stringify(usuario));
+      if (telefono.length < 7) {
+        document.getElementById('mensajeRegistro').innerText =
+          'Número de contacto inválido';
+        return;
+      }
 
-      document.getElementById('mensajeRegistro').innerText = 'Cuenta creada';
+      const nuevoUsuario = {
+        usuario,
+        correo,
+        password,
+        telefono
+      };
+
+      localStorage.setItem('usuario', JSON.stringify(nuevoUsuario));
+
+      document.getElementById('mensajeRegistro').innerText =
+        'Cuenta creada correctamente';
 
       abrir('login');
     }
