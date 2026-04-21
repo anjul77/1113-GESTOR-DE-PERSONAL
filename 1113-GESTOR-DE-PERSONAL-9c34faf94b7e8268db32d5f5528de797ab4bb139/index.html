@@ -1,50 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Lorteck Empresarial</title>
+
+<style>
+body { font-family: Arial; text-align: center; background:#eef2f3; }
+button { padding:10px; margin:5px; border:none; border-radius:6px; background:#007BFF; color:white; cursor:pointer; }
+input { padding:8px; margin:5px; }
+.pantalla { display:none; }
+#login { display:block; }
+
+table {
+  width:80%;
+  margin:auto;
+  border-collapse: collapse;
+}
+th, td {
+  border:1px solid #ccc;
+  padding:8px;
+}
+th { background:#007BFF; color:white; }
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="pantalla">
+  <h2>Lorteck</h2>
+  <input id="correo" placeholder="Correo"><br>
+  <input id="password" type="password" placeholder="Contraseña"><br>
+  <button onclick="login()">Iniciar sesión</button>
+  <button onclick="abrir('registro')">Registrarse</button>
+</div>
+
+<!-- REGISTRO -->
+<div id="registro" class="pantalla">
+  <h3>Registro</h3>
+  <input id="usuario" placeholder="Usuario"><br>
+  <input id="nuevoCorreo" placeholder="Correo"><br>
+  <input id="nuevoPassword" type="password" placeholder="Contraseña"><br>
+  <button onclick="registrarUsuario()">Crear cuenta</button>
+  <button onclick="abrir('login')">Volver</button>
+</div>
+
+<!-- MENU -->
+<div id="menu" class="pantalla">
+  <h2>Menú Lorteck</h2>
+  <button onclick="abrir('empleados')">Empleados</button>
+  <button onclick="logout()">Cerrar sesión</button>
+</div>
+
+<!-- EMPLEADOS -->
+<div id="empleados" class="pantalla">
+  <h3 id="usuarioActivo"></h3>
+
+  <input id="codigoEmpleado" placeholder="Código"><br>
+  <button onclick="registrarEmpleado()">Registrar Entrada</button>
+  <button onclick="registrarSalida()">Registrar Salida</button>
+
+  <br><br>
+
+  <button onclick="mostrarEmpleados()">Actualizar tabla</button>
+  <button onclick="abrir('menu')">Volver</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Usuario</th>
+        <th>Fecha</th>
+        <th>Entrada</th>
+        <th>Salida</th>
+      </tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+  </table>
+</div>
+
+<!-- 🔥 FIREBASE -->
 <script type="module">
 
-// 🔥 IMPORTS CORRECTOS
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
+  getAuth, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  updateDoc,
-  doc
+  getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-
-// 🔥 TU CONFIG (YA PUESTA)
+// ⚠️ REEMPLAZA ESTO
 const firebaseConfig = {
-  apiKey: "AIzaSyC2glIFIZb7nr2Oe8W8n7kCxNK30FZHl-U",
-  authDomain: "gestor-de-empresas-122.firebaseapp.com",
-  projectId: "gestor-de-empresas-122",
-  storageBucket: "gestor-de-empresas-122.firebasestorage.app",
-  messagingSenderId: "569796799568",
-  appId: "1:569796799568:web:864b926a8c4e1174433555",
-  measurementId: "G-DVE81V18JQ"
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_DOMINIO",
+  projectId: "TU_PROJECT_ID"
 };
 
-// 🔥 INICIALIZAR
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 🌍 VARIABLES
 let rol = "";
 let usuarioNombre = "";
 
-// 🧭 NAVEGACIÓN
+// NAVEGACIÓN
 window.abrir = (pantalla) => {
   document.querySelectorAll('.pantalla').forEach(p => p.style.display='none');
   document.getElementById(pantalla).style.display='block';
@@ -53,58 +115,49 @@ window.abrir = (pantalla) => {
   if (pantalla === "empleados") mostrarUsuario();
 };
 
-// 📝 REGISTRO
+// REGISTRO
 window.registrarUsuario = async () => {
   const usuario = document.getElementById("usuario").value;
   const correo = document.getElementById("nuevoCorreo").value;
   const pass = document.getElementById("nuevoPassword").value;
 
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, correo, pass);
+  const cred = await createUserWithEmailAndPassword(auth, correo, pass);
 
-    await addDoc(collection(db, "usuarios"), {
-      uid: cred.user.uid,
-      usuario,
-      correo,
-      rol: usuario.toLowerCase() === "jefe" ? "jefe" : "empleado"
-    });
+  await addDoc(collection(db, "usuarios"), {
+    uid: cred.user.uid,
+    usuario,
+    correo,
+    rol: usuario.toLowerCase() === "jefe" ? "jefe" : "empleado"
+  });
 
-    alert("Usuario creado");
-  } catch (e) {
-    alert(e.message);
-  }
+  alert("Usuario creado");
 };
 
-// 🔐 LOGIN
+// LOGIN
 window.login = async () => {
   const correo = document.getElementById("correo").value;
   const pass = document.getElementById("password").value;
 
-  try {
-    const cred = await signInWithEmailAndPassword(auth, correo, pass);
+  const cred = await signInWithEmailAndPassword(auth, correo, pass);
 
-    const q = query(collection(db, "usuarios"), where("uid","==",cred.user.uid));
-    const snapshot = await getDocs(q);
+  const q = query(collection(db, "usuarios"), where("uid","==",cred.user.uid));
+  const snapshot = await getDocs(q);
 
-    snapshot.forEach(doc => {
-      rol = doc.data().rol;
-      usuarioNombre = doc.data().usuario;
-    });
+  snapshot.forEach(doc => {
+    rol = doc.data().rol;
+    usuarioNombre = doc.data().usuario;
+  });
 
-    abrir("menu");
-
-  } catch (e) {
-    alert("Error: " + e.message);
-  }
+  abrir("menu");
 };
 
-// 🚪 LOGOUT
+// LOGOUT
 window.logout = async () => {
   await signOut(auth);
   abrir("login");
 };
 
-// 👑 PERMISOS
+// PERMISOS
 function verificarPermisos(){
   if(rol !== "jefe"){
     document.querySelectorAll("button").forEach(btn=>{
@@ -116,13 +169,13 @@ function verificarPermisos(){
   }
 }
 
-// 👤 MOSTRAR USUARIO
+// MOSTRAR USUARIO
 function mostrarUsuario(){
   document.getElementById("usuarioActivo").innerText =
     "Usuario: " + usuarioNombre;
 }
 
-// 🟢 ENTRADA
+// REGISTRAR ENTRADA
 window.registrarEmpleado = async () => {
   if(rol !== "jefe"){ alert("Sin permisos"); return; }
 
@@ -140,11 +193,14 @@ window.registrarEmpleado = async () => {
   alert("Entrada registrada");
 };
 
-// 🔴 SALIDA
+// REGISTRAR SALIDA
 window.registrarSalida = async () => {
   const codigo = document.getElementById("codigoEmpleado").value;
 
-  const q = query(collection(db,"asistencias"), where("codigo","==",codigo));
+  const q = query(collection(db,"asistencias"),
+    where("codigo","==",codigo)
+  );
+
   const snapshot = await getDocs(q);
 
   snapshot.forEach(async d=>{
@@ -158,7 +214,7 @@ window.registrarSalida = async () => {
   alert("Salida registrada");
 };
 
-// 📊 TABLA
+// MOSTRAR TABLA
 window.mostrarEmpleados = async () => {
   const tabla = document.getElementById("tabla");
   tabla.innerHTML = "";
@@ -182,3 +238,5 @@ window.mostrarEmpleados = async () => {
 
 </script>
 
+</body>
+</html>
