@@ -1,162 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lorteck</title>
-
-<style>
-body{
-  font-family: Arial;
-  text-align:center;
-  background:#ffffff;
-  transition:0.3s;
-}
-
-.pantalla{ display:none; }
-#login{ display:block; }
-
-input{
-  padding:8px;
-  margin:5px;
-}
-
-button{
-  padding:10px;
-  margin:5px;
-  border:none;
-  border-radius:6px;
-  background:#e9b5f0;
-  color:white;
-  cursor:pointer;
-}
-
-button:hover{
-  background:#2c0707f3;
-}
-
-table{
-  width:80%;
-  margin:auto;
-  border-collapse:collapse;
-}
-
-th,td{
-  border:1px solid #ccc;
-  padding:8px;
-}
-
-th{
-  background:#007BFF;
-  color:white;
-}
-
-.menu-grid{
-  display:grid;
-  grid-template-columns: repeat(2, 160px);
-  gap:10px;
-  justify-content:center;
-  margin-top:15px;
-}
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="login" class="pantalla">
-  <h3>Login</h3>
-  <input id="correo" placeholder="Correo"><br>
-  <input id="password" type="password" placeholder="Contraseña"><br>
-  <button onclick="login()">Entrar</button>
-  <button onclick="abrir('registro')">Registro</button>
-</div>
-
-<!-- REGISTRO -->
-<div id="registro" class="pantalla">
-  <h2>Registro</h2>
-  <input id="usuario" placeholder="Usuario"><br>
-  <input id="nuevoCorreo" placeholder="Correo"><br>
-  <input id="nuevoPassword" type="password"><br>
-  <button onclick="registrarUsuario()">Guardar</button>
-  <button onclick="abrir('login')">Volver</button>
-</div>
-
-<!-- MENU -->
-<div id="menu" class="pantalla">
-  <h3>Menú</h3>
-
-  <div class="menu-grid">
-    <button onclick="abrirConDelay('empleados')">Empleados</button>
-    <button id="btnAdmin" onclick="abrirConDelay('admin')">Admin</button>
-    <button onclick="abrirConDelay('reportes')">Reportes</button>
-    <button onclick="abrirConDelay('perfil')">Perfil</button>
-  </div>
-
-  <br>
-  <button onclick="logout()">Cerrar sesión</button>
-</div>
-
-<!-- EMPLEADOS -->
-<div id="empleados" class="pantalla">
-  <h3 id="usuarioActivo"></h3>
-
-  <input id="codigoEmpleado" placeholder="Código"><br>
-  <button onclick="registrarEmpleado()">Entrada</button>
-  <button onclick="registrarSalida()">Salida</button>
-
-  <br><br>
-  <button onclick="mostrarEmpleados()">Actualizar</button>
-  <button onclick="abrirConDelay('menu')">Volver</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Usuario</th>
-        <th>Fecha</th>
-        <th>Entrada</th>
-        <th>Salida</th>
-      </tr>
-    </thead>
-    <tbody id="tabla"></tbody>
-  </table>
-</div>
-
-<!-- ADMIN -->
-<div id="admin" class="pantalla">
-  <h2>Admin</h2>
-
-  <button onclick="cargarUsuarios()">Usuarios</button>
-  <button onclick="cargarAsistencias()">Asistencias</button>
-  <button onclick="abrirConDelay('menu')">Volver</button>
-
-  <h3>Usuarios</h3>
-  <table><tbody id="tablaUsuarios"></tbody></table>
-
-  <h3>Asistencias</h3>
-  <table><tbody id="tablaAdmin"></tbody></table>
-</div>
-
-<!-- OTROS -->
-<div id="reportes" class="pantalla">
-  <h2>Reportes</h2>
-  <button onclick="abrirConDelay('menu')">Volver</button>
-</div>
-
-<div id="perfil" class="pantalla">
-  <h2>Perfil</h2>
-  <button onclick="abrirConDelay('menu')">Volver</button>
-</div>
-
 <script>
 let rol = "";
 let usuarioNombre = "";
 
 /* 👑 ADMINS */
 const ADMINS = [
-  "admin@empresa.com",
-  "jefe@empresa.com"
+  "admin@empresa.com"
 ];
 
 /* STORAGE */
@@ -176,13 +24,13 @@ function setAsistencias(data){
 /* INICIO */
 window.onload = () => abrir("login");
 
-/* DELAY */
+/* ANIMACIÓN */
 function abrirConDelay(p){
-  document.body.style.opacity="0.5";
+  document.body.style.opacity="0.4";
   setTimeout(()=>{
     document.body.style.opacity="1";
     abrir(p);
-  },1000);
+  },500);
 }
 
 /* NAV */
@@ -197,65 +45,98 @@ function abrir(p){
 
 /* REGISTRO */
 function registrarUsuario(){
-  let u=usuario.value;
-  let c=nuevoCorreo.value;
-  let p=nuevoPassword.value;
+  let u = usuario.value.trim();
+  let c = nuevoCorreo.value.trim();
+  let p = nuevoPassword.value.trim();
 
-  if(!u||!c||!p) return alert("Completa todo");
+  if(!u || !c || !p){
+    alert("Completa todos los campos");
+    return;
+  }
 
-  let usuarios=getUsuarios();
+  let usuarios = getUsuarios();
 
-  if(usuarios.find(x=>x.correo===c))
-    return alert("Ya existe");
+  if(usuarios.find(x=>x.correo===c)){
+    alert("Este correo ya existe");
+    return;
+  }
 
   let rolAsignado = ADMINS.includes(c) ? "admin" : "empleado";
 
-  usuarios.push({usuario:u,correo:c,pass:p,rol:rolAsignado});
+  usuarios.push({usuario:u, correo:c, pass:p, rol:rolAsignado});
   setUsuarios(usuarios);
 
-  alert("Registrado");
+  alert("✅ Usuario registrado correctamente");
+
+  // limpiar
+  usuario.value="";
+  nuevoCorreo.value="";
+  nuevoPassword.value="";
+
   abrir("login");
 }
 
 /* LOGIN */
 function login(){
-  let c=correo.value;
-  let p=password.value;
+  let c = correo.value.trim();
+  let p = password.value.trim();
 
-  let user=getUsuarios().find(x=>x.correo===c&&x.pass===p);
+  if(!c || !p){
+    alert("Ingresa correo y contraseña");
+    return;
+  }
 
-  if(!user) return alert("Error");
+  let user = getUsuarios().find(x=>x.correo===c && x.pass===p);
 
-  rol=user.rol;
-  usuarioNombre=user.usuario;
+  if(!user){
+    alert("Correo o contraseña incorrectos");
+    return;
+  }
+
+  rol = user.rol;
+  usuarioNombre = user.usuario;
+
+  // limpiar
+  correo.value="";
+  password.value="";
 
   abrir("menu");
 }
 
 /* LOGOUT */
 function logout(){
-  rol=""; usuarioNombre="";
+  rol="";
+  usuarioNombre="";
   abrir("login");
 }
 
 /* PERMISOS */
 function verificarPermisos(){
-  const btn=document.getElementById("btnAdmin");
-  if(btn) btn.style.display=rol==="admin"?"inline-block":"none";
+  const btn = document.getElementById("btnAdmin");
+  if(btn){
+    btn.style.display = rol==="admin" ? "inline-block" : "none";
+  }
 }
 
 /* USUARIO */
 function mostrarUsuario(){
-  usuarioActivo.innerText=usuarioNombre+" ("+rol+")";
+  usuarioActivo.innerText = usuarioNombre + " (" + rol + ")";
 }
 
 /* ASISTENCIA */
 function registrarEmpleado(){
-  if(rol!=="admin") return alert("Sin permisos");
+  if(rol!=="admin"){
+    alert("No tienes permisos");
+    return;
+  }
 
-  let c=codigoEmpleado.value;
+  let c = codigoEmpleado.value.trim();
+  if(!c){
+    alert("Ingresa un código");
+    return;
+  }
 
-  let a=getAsistencias();
+  let a = getAsistencias();
 
   a.push({
     codigo:c,
@@ -266,39 +147,64 @@ function registrarEmpleado(){
   });
 
   setAsistencias(a);
-  alert("Entrada OK");
+
+  codigoEmpleado.value="";
+  alert("✅ Entrada registrada");
 }
 
 function registrarSalida(){
-  let c=codigoEmpleado.value;
+  let c = codigoEmpleado.value.trim();
+  if(!c){
+    alert("Ingresa un código");
+    return;
+  }
 
-  let a=getAsistencias();
+  let a = getAsistencias();
 
-  let r=a.find(x=>x.codigo===c&&x.salida==="");
+  let r = a.find(x=>x.codigo===c && x.salida==="");
 
-  if(!r) return alert("No hay entrada");
+  if(!r){
+    alert("No hay entrada registrada");
+    return;
+  }
 
-  r.salida=new Date().toLocaleTimeString();
+  r.salida = new Date().toLocaleTimeString();
 
   setAsistencias(a);
-  alert("Salida OK");
+
+  codigoEmpleado.value="";
+  alert("✅ Salida registrada");
 }
 
 /* TABLAS */
 function mostrarEmpleados(){
-  tabla.innerHTML=getAsistencias().map(x=>`
+  let datos = getAsistencias();
+
+  if(datos.length===0){
+    tabla.innerHTML = "<tr><td colspan='5'>Sin registros</td></tr>";
+    return;
+  }
+
+  tabla.innerHTML = datos.map(x=>`
     <tr>
       <td>${x.codigo}</td>
       <td>${x.usuario}</td>
       <td>${x.fecha}</td>
       <td>${x.entrada}</td>
-      <td>${x.salida||"-"}</td>
+      <td>${x.salida || "-"}</td>
     </tr>
   `).join("");
 }
 
 function cargarUsuarios(){
-  tablaUsuarios.innerHTML=getUsuarios().map(x=>`
+  let datos = getUsuarios();
+
+  if(datos.length===0){
+    tablaUsuarios.innerHTML = "<tr><td colspan='3'>Sin usuarios</td></tr>";
+    return;
+  }
+
+  tablaUsuarios.innerHTML = datos.map(x=>`
     <tr>
       <td>${x.usuario}</td>
       <td>${x.correo}</td>
@@ -308,17 +214,21 @@ function cargarUsuarios(){
 }
 
 function cargarAsistencias(){
-  tablaAdmin.innerHTML=getAsistencias().map(x=>`
+  let datos = getAsistencias();
+
+  if(datos.length===0){
+    tablaAdmin.innerHTML = "<tr><td colspan='5'>Sin registros</td></tr>";
+    return;
+  }
+
+  tablaAdmin.innerHTML = datos.map(x=>`
     <tr>
       <td>${x.codigo}</td>
       <td>${x.usuario}</td>
       <td>${x.fecha}</td>
       <td>${x.entrada}</td>
-      <td>${x.salida||"-"}</td>
+      <td>${x.salida || "-"}</td>
     </tr>
   `).join("");
 }
 </script>
-
-</body>
-</html>
